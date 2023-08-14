@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  loscantores:
+    image: jormeno2020/elizabethpincheira:0.0.1
+    container_name: "elizabethpincheira"
+    restart: always
+    networks:
+      - traefik-local
+    labels:
+      - "traefik.http.routers.elizabethpincheira.rule=Host(`elizabethpincheira.cl`)"
+
+networks:
+  traefik-local:
+    external: true
+     
+
+
+
