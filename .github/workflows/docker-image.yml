@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /pronto
+            cd pronto/
             git pull origin main
             docker-compose pull  # Descarga las últimas imágenes
             docker-compose down   # Detiene los contenedores antiguos
