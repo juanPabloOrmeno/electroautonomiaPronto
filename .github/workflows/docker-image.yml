@@ -42,8 +42,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /shcc  # Asegúrate de que esta es la carpeta correcta en el servidor
-            
+            cd /root/shcc  # Cambié la ruta para que use la correcta
+
             echo "Deteniendo contenedores existentes..."
             docker-compose down  # Detiene los contenedores actuales
             
@@ -60,4 +60,4 @@ jobs:
             docker system prune -af  # Limpia imágenes y contenedores antiguos
 
             echo "Reiniciando Nginx Proxy (si es necesario)..."
-            docker-compose restart nginx-proxy  # Para evitar caché de proxy inverso
+            docker-compose restart nginx-proxy || true  # Evita error si nginx-proxy no está en la misma carpeta
