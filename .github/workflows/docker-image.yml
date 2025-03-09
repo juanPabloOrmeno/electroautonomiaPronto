@@ -42,7 +42,7 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /root/shcc  # Cambié la ruta para que use la correcta
+            cd /root/pronto  # Cambié la ruta para que use la correcta
 
             echo "Deteniendo contenedores existentes..."
             docker-compose down  # Detiene los contenedores actuales
