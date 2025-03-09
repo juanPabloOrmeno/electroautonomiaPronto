@@ -3,7 +3,7 @@ version: '3'
 services:
   electroautonomia:
     image: jormeno2020/electroautonomia:latest
-    container_name: "electroautonomia"
+    container_name: "electro_front"
     restart: always
     networks:
       - traefik-local

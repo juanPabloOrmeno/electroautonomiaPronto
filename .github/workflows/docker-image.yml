@@ -2,9 +2,11 @@ name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
 
@@ -46,8 +48,8 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd pronto/
-            docker-compose pull  # Descarga las últimas imágenes
+            cd pronto/  # Asegúrate de que esta es la carpeta correcta en el servidor
+            docker-compose pull  # Descarga la última versión de la imagen
             docker-compose down   # Detiene los contenedores antiguos
             docker-compose up -d  # Inicia los nuevos contenedores
             docker system prune -f  # Limpia imágenes antiguas
