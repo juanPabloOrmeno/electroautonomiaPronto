@@ -42,22 +42,28 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /root/pronto  # Cambié la ruta para que use la correcta
+            cd /root/pronto
 
             echo "Deteniendo contenedores existentes..."
-            docker-compose down  # Detiene los contenedores actuales
-            
+            docker-compose down
+
             echo "Eliminando imagen antigua..."
-            docker rmi -f jormeno2020/electroautonomia:latest || true  # Elimina la imagen antigua
-            
+            docker rmi -f jormeno2020/electroautonomia:latest || true
+
             echo "Descargando última imagen..."
-            docker-compose pull  # Descarga la última versión de la imagen desde Docker Hub
-            
+            docker-compose pull
+
             echo "Levantando nuevos contenedores..."
-            docker-compose up -d  # Levanta los nuevos contenedores
-            
-            echo "Limpiando imágenes y caché innecesarios..."
-            docker system prune -af  # Limpia imágenes y contenedores antiguos
+            docker-compose up -d
+
+            echo "Esperando 10 segundos para que los contenedores arranquen..."
+            sleep 10
+
+            echo "Verificando el estado de los contenedores..."
+            docker ps -a
+
+            echo "Verificando logs del contenedor de la aplicación..."
+            docker logs electro_front
 
             echo "Reiniciando Nginx Proxy (si es necesario)..."
-            docker-compose restart nginx-proxy || true  # Evita error si nginx-proxy no está en la misma carpeta
+            docker-compose restart nginx-proxy || true
