@@ -1,38 +1,56 @@
-name: Docker Image CI
+name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
 
-  build:
-
+  build-and-push:
+    name: Build and Push Docker Images
     runs-on: ubuntu-latest
-
     steps:
-    - name: checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: login dockerhub
-      env:
-        DOCKER_USER:  ${{ secrets.DOCKER_USER }}
-        DOCKER_PASS:  ${{ secrets.DOCKER_PASS }}
-      run: |
-        echo "Iniciando login"
-        docker login -u $DOCKER_USER -p $DOCKER_PASS
-        echo "fin login"
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
 
-    - name: build image
-      run: |
-        docker build -t jormeno2020/electroautonomia:0.0.1 .
-        docker build -t jormeno2020/electroautonomia .
+      - name: Build and push backend image
+        run: |
+          docker build -t jormeno2020/backend-electroautonomia:0.0.1 -t jormeno2020/backend-electroautonomia:latest .
+          docker push jormeno2020/backend-electroautonomia:0.0.1
+          docker push jormeno2020/backend-electroautonomia:latest
 
-    - name: push image
-      run: |
-        docker push jormeno2020/electroautonomia:0.0.1
-        docker push jormeno2020/electroautonomia
+      - name: Build and push frontend tienda image
+        run: |
+          docker build -t jormeno2020/tienda-electroautonomia:0.0.1 -t jormeno2020/tienda-electroautonomia:latest ./frontend/tienda
+          docker push jormeno2020/tienda-electroautonomia:0.0.1
+          docker push jormeno2020/tienda-electroautonomia:latest
+
+      - name: Build and push frontend admin image
+        run: |
+          docker build -t jormeno2020/admin-electroautonomia:0.0.1 -t jormeno2020/admin-electroautonomia:latest ./frontend/admin
+          docker push jormeno2020/admin-electroautonomia:0.0.1
+          docker push jormeno2020/admin-electroautonomia:latest
+
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /ruta/del/proyecto
+            git pull origin main
+            docker-compose pull  # Descarga las últimas imágenes
+            docker-compose down   # Detiene los contenedores antiguos
+            docker-compose up -d  # Inicia los nuevos contenedores
+            docker system prune -f
