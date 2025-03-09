@@ -47,7 +47,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd pronto/
-            git pull origin main
             docker-compose pull  # Descarga las últimas imágenes
             docker-compose down   # Detiene los contenedores antiguos
             docker-compose up -d  # Inicia los nuevos contenedores

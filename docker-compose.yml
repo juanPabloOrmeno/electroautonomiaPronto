@@ -2,7 +2,7 @@ version: '3'
 
 services:
   electroautonomia:
-    image: jormeno2020/electroautonomia:0.0.1
+    image: jormeno2020/electroautonomia:latest
     container_name: "electroautonomia"
     restart: always
     networks:
