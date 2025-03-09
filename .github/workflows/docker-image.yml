@@ -4,14 +4,11 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
 
   build-and-push:
-    name: Build and Push Docker Images
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -27,12 +24,9 @@ jobs:
           echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
           echo "Login exitoso a Docker Hub"
 
-      - name: Build Docker image
+      - name: Build and Push Docker Image
         run: |
           docker build -t jormeno2020/electroautonomia:0.0.1 -t jormeno2020/electroautonomia:latest .
-
-      - name: Push Docker image to Docker Hub
-        run: |
           docker push jormeno2020/electroautonomia:0.0.1
           docker push jormeno2020/electroautonomia:latest
 
@@ -48,8 +42,22 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd pronto/  # Asegúrate de que esta es la carpeta correcta en el servidor
-            docker-compose pull  # Descarga la última versión de la imagen
-            docker-compose down   # Detiene los contenedores antiguos
-            docker-compose up -d  # Inicia los nuevos contenedores
-            docker system prune -f  # Limpia imágenes antiguas
+            cd /shcc  # Asegúrate de que esta es la carpeta correcta en el servidor
+            
+            echo "Deteniendo contenedores existentes..."
+            docker-compose down  # Detiene los contenedores actuales
+            
+            echo "Eliminando imagen antigua..."
+            docker rmi -f jormeno2020/electroautonomia:latest || true  # Elimina la imagen antigua
+            
+            echo "Descargando última imagen..."
+            docker-compose pull  # Descarga la última versión de la imagen desde Docker Hub
+            
+            echo "Levantando nuevos contenedores..."
+            docker-compose up -d  # Levanta los nuevos contenedores
+            
+            echo "Limpiando imágenes y caché innecesarios..."
+            docker system prune -af  # Limpia imágenes y contenedores antiguos
+
+            echo "Reiniciando Nginx Proxy (si es necesario)..."
+            docker-compose restart nginx-proxy  # Para evitar caché de proxy inverso
